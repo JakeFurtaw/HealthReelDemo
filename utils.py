@@ -1,5 +1,5 @@
 from llama_index.core.chat_engine.types import ChatMode
-from llama_index.core import VectorStoreIndex, Settings, SimpleDirectoryReader
+from llama_index.core import VectorStoreIndex, Settings
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.llms.ollama import Ollama
