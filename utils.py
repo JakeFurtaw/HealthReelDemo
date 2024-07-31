@@ -4,6 +4,15 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+import torch
+
+
+# Set device function is not finished or implemented have it hardcoded to use both gpus
+def set_device():
+    if torch.cuda_is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
 
 
 def set_llm():
@@ -21,6 +30,7 @@ def set_embed_model():
     return embed_model
 
 
+# Saving user data to a json file
 def load_docs():
     documents = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
     return documents
@@ -31,8 +41,8 @@ def setup_index_and_chat_engine(documents, embed_model, llm):
     chat_store = SimpleChatStore()
     memory = ChatMemoryBuffer.from_defaults(token_limit=3900,
                                             chat_store=chat_store,
-                                            chat_store_key="user1")
-    chat_store.persist(persist_path="/data/chat_store.json")
+                                            chat_store_key="user1")  # Swap Users here
+    chat_store.persist(persist_path="/data/chat_store.json")  # Saves chat logs to json file
     index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
     Settings.llm = llm
     chat_engine = index.as_chat_engine(
