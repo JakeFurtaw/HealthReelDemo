@@ -1,5 +1,5 @@
 from llama_index.core.chat_engine.types import ChatMode
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, Document
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.llms.ollama import Ollama
@@ -25,7 +25,7 @@ def set_llm():
 
 def set_embed_model():
     embed_model = HuggingFaceEmbedding(
-        model_name="dunzhang/stella_en_400M_v5",
+        model_name=r"C:\Programming\models\embedding\stella_en_400M_v5",
         device=set_device(1),
         trust_remote_code=True)
     return embed_model
@@ -33,7 +33,10 @@ def set_embed_model():
 
 # Saving user data to a json file
 def load_docs():
-    documents = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
+    chat_store = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
+    documents = []
+    for message in chat_store.get_messages("user1"):  # Make sure "user1" matches the chat_store_key
+        documents.append(Document(text=message.content, metadata={"role": message.role}))
     return documents
 
 
@@ -42,10 +45,10 @@ def setup_index_and_chat_engine(documents, embed_model, llm):
     chat_store = SimpleChatStore()
     memory = ChatMemoryBuffer.from_defaults(token_limit=3900,
                                             chat_store=chat_store,
-                                            chat_store_key="user1")  # Swap Users here
-    chat_store.persist(persist_path="/data/chat_store.json")  # Saves chat logs to json file
-    index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
+                                            chat_store_key="user1")
+    chat_store.persist(persist_path="chat_store.json")
     Settings.llm = llm
+    index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
     chat_engine = index.as_chat_engine(
         chat_mode=ChatMode.BEST,
         memory=memory,
