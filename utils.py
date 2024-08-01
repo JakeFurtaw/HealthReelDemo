@@ -47,7 +47,8 @@ def setup_index_and_chat_engine(documents, embed_model, llm):
                                             chat_store=chat_store,
                                             chat_store_key="user1")  # Swap Users here
     chat_store.persist(persist_path="/data/chat_store.json")  # Saves chat logs to json file
-    index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
+    index = VectorStoreIndex.from_documents(documents,
+                                            embed_model=embed_model)
     Settings.llm = llm
     chat_engine = index.as_chat_engine(
         chat_mode=ChatMode.BEST,
