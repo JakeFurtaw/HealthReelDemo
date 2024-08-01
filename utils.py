@@ -1,5 +1,5 @@
 from llama_index.core.chat_engine.types import ChatMode
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, Document
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.llms.ollama import Ollama
@@ -7,32 +7,36 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import torch
 
 
-# Set device function is not finished or implemented have it hardcoded to use both gpus
-def set_device():
-    if torch.cuda_is_available():
-        device = "cuda"
+def set_device(gpu: int = None) -> str:
+    if torch.cuda.is_available() and gpu is not None:
+        device = f"cuda:{gpu}"
     else:
         device = "cpu"
+    return device
 
 
 def set_llm():
     llm = Ollama(model="mistral-nemo:latest",
                  request_timeout=30.0,
-                 device="cuda:0")
+                 device=set_device(0))
     return llm
 
 
 def set_embed_model():
     embed_model = HuggingFaceEmbedding(
-        model_name="dunzhang/stella_en_400M_v5",
-        device="cuda:1",
+        model_name=r"C:\Programming\models\embedding\stella_en_400M_v5",
+        device=set_device(1),
         trust_remote_code=True)
     return embed_model
 
 
-# Saving user data to a json file
+# Retrieving user messages from JSON file using specific user key
 def load_docs():
-    documents = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
+    chat_store = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
+    documents = [
+        Document(text=message.content, metadata={"role": message.role})
+        for message in chat_store.get_messages("user1")
+    ]
     return documents
 
 
