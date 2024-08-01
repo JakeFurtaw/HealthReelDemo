@@ -6,6 +6,9 @@ from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import torch
 
+# Swap users here
+USER = "user1"
+
 
 def set_device(gpu: int = None) -> str:
     if torch.cuda.is_available() and gpu is not None:
@@ -35,7 +38,7 @@ def load_docs():
     chat_store = SimpleChatStore.from_persist_path(persist_path="/data/chat_store.json")
     documents = [
         Document(text=message.content, metadata={"role": message.role})
-        for message in chat_store.get_messages("user1")
+        for message in chat_store.get_messages(USER)
     ]
     return documents
 
@@ -45,7 +48,7 @@ def setup_index_and_chat_engine(documents, embed_model, llm):
     chat_store = SimpleChatStore()
     memory = ChatMemoryBuffer.from_defaults(token_limit=3900,
                                             chat_store=chat_store,
-                                            chat_store_key="user1")  # Swap Users here
+                                            chat_store_key=USER)
     chat_store.persist(persist_path="/data/chat_store.json")  # Saves chat logs to json file
     index = VectorStoreIndex.from_documents(documents,
                                             embed_model=embed_model)
