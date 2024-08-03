@@ -1,10 +1,11 @@
 from utils import (
-    setup_index_and_chat_engine, load_environment_and_models
+    setup_index_and_chat_engine, load_environment_and_models, load_docs
 )
 
 
 def main() -> None:
     embed_model, llm = load_environment_and_models()
+    docs = load_docs()
     # Chat Engine, Added Memory
     chat_engine = setup_index_and_chat_engine(docs, embed_model, llm)
     print("Welcome to HealthG, your personal health assistant.")

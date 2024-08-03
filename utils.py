@@ -8,7 +8,6 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 import torch
 
 
-# Set device function is not finished or implemented have it hardcoded to use both gpus
 def set_device(gpu: int = None) -> str:
     if torch.cuda.is_available() and gpu is not None:
         device = f"cuda:{gpu}"
@@ -37,7 +36,10 @@ def load_docs():
     loaded_chat_store = SimpleChatStore.from_persist_path(
         persist_path="data/chatstorage.json"
     )
-    docs = loaded_chat_store
+    docs = []
+    for chats in loaded_chat_store:
+        for chat in chats:
+            chat.append(docs)
     return docs
 
 
