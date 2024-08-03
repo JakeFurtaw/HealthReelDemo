@@ -1,11 +1,12 @@
 from llama_index.core.chat_engine.types import ChatMode
 from llama_index.embeddings.langchain import LangchainEmbedding
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, Document
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.llms.ollama import Ollama
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 import torch
+import os
 
 
 def set_device(gpu: int = None) -> str:
@@ -33,13 +34,16 @@ def load_embedding_model(
 
 
 def load_docs():
-    loaded_chat_store = SimpleChatStore.from_persist_path(
-        persist_path="data/chatstorage.json"
-    )
+    chat_store_path = "data/chatstorage.json"
+    if not os.path.exists(chat_store_path) or os.path.getsize(chat_store_path) == 0:
+        print("Warning: Chat storage file is empty or doesn't exist.")
+        return [Document(text="No chat history available.", metadata={"role": "system"})]
+
+    loaded_chat_store = SimpleChatStore.from_persist_path(persist_path=chat_store_path)
     docs = []
-    for chats in loaded_chat_store:
-        for chat in chats:
-            chat.append(docs)
+    for chat_key, messages in loaded_chat_store.items():
+        for message in messages:
+            docs.append(Document(text=message.content, metadata={"role": message.role}))
     return docs
 
 
