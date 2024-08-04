@@ -12,6 +12,7 @@ def main() -> None:
     embed_model, llm = load_environment_and_models()
     chats = load_past_chats()
     simple_chat_store, chat_memory = handle_chat_storage()
+    message_index = 0
 
     # Chat Engine, Added Memory
     chat_engine = setup_index_and_chat_engine(chats, embed_model, llm, chat_memory)
@@ -25,8 +26,10 @@ def main() -> None:
         user_query = input("Ask Me Anything: ")
         # Adding new query to memory and storage
         new_message = ChatMessage(role="human", content=user_query)
-        simple_chat_store.add_message(key=user_id, message=new_message)
+        simple_chat_store.add_message(key=user_id, message=new_message, idx=message_index)
         chat_memory.put(new_message)
+        # Increment the message index again
+        message_index += 1
 
         if user_query.lower() == 'e':
             # Removing chat if it's the exit key
@@ -40,9 +43,11 @@ def main() -> None:
         print("Response:", response)
         # Add assistant's response to memory and storage
         assistant_message = ChatMessage(role="assistant", content=str(response))
-        simple_chat_store.add_message(key=user_id, message=assistant_message)
+        simple_chat_store.add_message(key=user_id, message=assistant_message, idx=message_index)
         chat_memory.put(assistant_message)
         print("\n" + "-" * 100 + "\n")
+        # Increment the message index again
+        message_index += 1
 
 
 if __name__ == "__main__":

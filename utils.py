@@ -39,7 +39,7 @@ def handle_chat_storage():
     simple_chat_store = SimpleChatStore()
     simple_chat_store.persist(persist_path="data/chat_storage.json")
 
-    # Create ChatMemoryBuffer using SimpleChatStore
+    # Create ChatMemoryBuffer
     chat_memory = ChatMemoryBuffer.from_defaults(
         token_limit=3900,
         chat_store=simple_chat_store
@@ -60,11 +60,11 @@ def load_past_chats():
     loaded_chat_store = SimpleChatStore.from_persist_path(persist_path=chat_store_path)
     chats = []
     for chat_key, messages in loaded_chat_store.items():
-        for message in messages:
+        for idx, message in enumerate(messages):
             if isinstance(message, dict):
-                chats.append(Document(text=message['content'], metadata={"role": message['role']}))
+                chats.append(Document(text=message['content'], metadata={"role": message['role'], "index": idx}))
             elif isinstance(message, str):
-                chats.append(Document(text=message, metadata={"role": "unknown"}))
+                chats.append(Document(text=message, metadata={"role": "unknown", "index": idx}))
     return chats
 
 
