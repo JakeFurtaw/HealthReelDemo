@@ -15,7 +15,7 @@ def main() -> None:
 
     # Chat Engine, Added Memory
     chat_engine = setup_index_and_chat_engine(chats, embed_model, llm, chat_memory)
-    # Loading past user messages here
+    # Loading past user messages
     past_messages = simple_chat_store.get_messages(key=user_id)
     for msg in past_messages:
         chat_memory.put(ChatMessage(role=msg['role'], content=msg['content']))
@@ -23,7 +23,7 @@ def main() -> None:
     print("Welcome to HealthG, your personal health assistant.")
     while True:
         user_query = input("Ask Me Anything: ")
-        # Adding new query to memory
+        # Adding new query to memory and storage
         new_message = ChatMessage(role="human", content=user_query)
         simple_chat_store.add_message(key=user_id, message=new_message)
         chat_memory.put(new_message)
@@ -38,12 +38,10 @@ def main() -> None:
 
         response = chat_engine.chat(user_query)
         print("Response:", response)
-
-        # Add assistant's response to memory
+        # Add assistant's response to memory and storage
         assistant_message = ChatMessage(role="assistant", content=str(response))
         simple_chat_store.add_message(key=user_id, message=assistant_message)
         chat_memory.put(assistant_message)
-
         print("\n" + "-" * 100 + "\n")
 
 

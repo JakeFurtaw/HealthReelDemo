@@ -1,6 +1,7 @@
 from llama_index.core.chat_engine.types import ChatMode
 from llama_index.embeddings.langchain import LangchainEmbedding
 from llama_index.core import VectorStoreIndex, Settings, Document
+from llama_index.core.llms import ChatMessage
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.llms.ollama import Ollama
@@ -18,7 +19,7 @@ def set_device(gpu: int = None) -> str:
 
 
 def load_embedding_model(
-        model_name: str = "dunzhang/stella_en_1.5B_v5", device=set_device(0)
+        model_name: str = "dunzhang/stella_en_400M_v5", device=set_device(0)
 ) -> HuggingFaceBgeEmbeddings:
     model_kwargs = {"device": device,
                     "trust_remote_code": True}
@@ -48,6 +49,9 @@ def handle_chat_storage():
 
 
 def load_past_chats():
+    # -----------------------------------------------
+    # -------Change storage location below-----------
+    # -----------------------------------------------
     chat_store_path = "data/chat_storage.json"
     if not os.path.exists(chat_store_path) or os.path.getsize(chat_store_path) == 0:
         print("Warning: Chat storage file is empty or doesn't exist.")
@@ -67,7 +71,7 @@ def load_past_chats():
 def load_environment_and_models():
     lc_embedding_model = load_embedding_model()
     embed_model = LangchainEmbedding(lc_embedding_model)
-    llm = Ollama(model="mistral:latest", request_timeout=30.0, device=set_device(1))
+    llm = Ollama(model="mistral-nemo:latest", request_timeout=30.0, device=set_device(1))
     return embed_model, llm
 
 
@@ -81,19 +85,32 @@ def setup_index_and_query_engine(docs, embed_model, llm):
 def setup_index_and_chat_engine(chats, embed_model, llm, memory):
     index = VectorStoreIndex.from_documents(chats, embed_model=embed_model)
     Settings.llm = llm
+    # Define the chat prompt
+    chat_prompt = (
+        "You are HealthG, an advanced AI health assistant designed to help patients on their fitness \n"
+        "and wellness journey. Your knowledge spans across fitness, nutrition, mental health, and general \n"
+        "well-being. Always strive to provide accurate, helpful, and encouraging advice. If you're unsure \n"
+        "about something, don't hesitate to say 'I'm not certain about that' and suggest consulting with a \n"
+        "healthcare professional. Remember to be empathetic and supportive in your interactions. \n"
+        "Your goal is to guide users towards healthier lifestyles while ensuring they seek professional \n"
+        "medical advice when necessary."
+    )
+
+    system_message = ChatMessage(role="system", content=chat_prompt)
     chat_engine = index.as_chat_engine(
         chat_mode=ChatMode.CONTEXT,
         memory=memory,
         llm=llm,
-        context_prompt=("Context information is below.\n"
-                        "---------------------\n"
-                        "{context_str}\n"
-                        "---------------------\n"
-                        "You are an Health Assistant named HealthG that is designed to help patients on their fitness\n"
-                        "journey. Given the context information above answer any question health related. \n"
-                        "You are an fitness, health, and mental health expert if you dont know the answer \n"
-                        "say 'I don't know!'.\n"
-                        "Query: {query_str}\n"
-                        "Answer: ")
+        system_prompt=system_message,
+        context_prompt=(
+            "Context information is below.\n"
+            "---------------------\n"
+            "{context_str}\n"
+            "---------------------\n"
+            "Given the context information and your role as HealthG, please provide a helpful response \n"
+            "to the user's query.\n"
+            "Human: {query_str}\n"
+            "HealthG: "
+        )
     )
     return chat_engine
