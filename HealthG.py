@@ -28,7 +28,7 @@ def main() -> None:
         new_message = ChatMessage(role="human", content=user_query)
         simple_chat_store.add_message(key=user_id, message=new_message, idx=message_index)
         chat_memory.put(new_message)
-        # Increment the message index again
+        # Increment the message index for user message
         message_index += 1
 
         if user_query.lower() == 'e':
@@ -46,7 +46,7 @@ def main() -> None:
         simple_chat_store.add_message(key=user_id, message=assistant_message, idx=message_index)
         chat_memory.put(assistant_message)
         print("\n" + "-" * 100 + "\n")
-        # Increment the message index again
+        # Increment the message index again for assistant message
         message_index += 1
 
 
