@@ -44,7 +44,7 @@ def handle_chat_storage():
 
     # Create ChatMemoryBuffer
     chat_memory = ChatMemoryBuffer.from_defaults(
-        token_limit=3900,
+        token_limit=6000,
         chat_store=simple_chat_store
     )
 
@@ -105,6 +105,7 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
         chat_mode=ChatMode.CONTEXT,
         memory=memory,
         llm=llm,
+        max_tokens=150,
         system_prompt=system_message,
         context_prompt=(
             "Context information is below.\n"

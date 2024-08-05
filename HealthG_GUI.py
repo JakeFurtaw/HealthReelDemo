@@ -2,14 +2,16 @@ import gradio as gr
 import queue
 import threading
 from HealthG import main as healthg_main
+from utils import handle_chat_storage
 
 
 class HealthGradio:
     def __init__(self):
         self.input_queue = queue.Queue()
         self.output_queue = queue.Queue()
-        self.chat_history = []
-        self.healthg_running = True
+        self.simple_chat_store, self.chat_memory = handle_chat_storage()
+        self.user_id = "user1"
+        self.message_index = 0
 
         # Start HealthG in a separate thread
         self.healthg_thread = threading.Thread(target=self.run_healthg)
@@ -19,10 +21,20 @@ class HealthGradio:
         print(f"Received message: {message}")  # Debug print
         self.input_queue.put(message)
 
-        # Wait for the response from HealthG with a timeout
         try:
-            response = self.output_queue.get(timeout=10)
+            response = self.output_queue.get(timeout=60)
             print(f"Received response: {response}")  # Debug print
+
+            # Save the message and response to chat history
+            self.simple_chat_store.add_message(self.user_id, {"role": "user", "content": message}, self.message_index)
+            self.message_index += 1
+            self.simple_chat_store.add_message(self.user_id, {"role": "assistant", "content": response},
+                                               self.message_index)
+            self.message_index += 1
+
+            # Persist the updated chat store
+            self.simple_chat_store.persist("data/chat_storage.json")
+
             return response
         except queue.Empty:
             print("Timeout waiting for response")  # Debug print
@@ -43,13 +55,19 @@ class HealthGradio:
         healthg_main(custom_input=custom_input, custom_print=custom_print)
 
     def launch(self):
+        # Load past chat history
+        past_messages = self.simple_chat_store.get_messages(self.user_id)
+        initial_chat = [(msg["content"], msg["content"]) for msg in past_messages if msg["role"] == "assistant"]
+
         iface = gr.ChatInterface(
             self.chat,
-            chatbot=gr.Chatbot(height=400),
-            textbox=gr.Textbox(placeholder="Type your health-related question here...", container=False),
+            chatbot=gr.Chatbot(value=initial_chat, height=600),
+            textbox=gr.Textbox(label="HealthG", show_label=True, container=True, autoscroll=True,
+                               placeholder="Type your health-related question here..."),
             title="HealthG: Your Personal Health Assistant",
             description="Welcome to HealthG! I'm here to assist you with health-related questions and advice. How can "
                         "I help you today?",
+            show_progress="full",
             theme="soft",
             examples=[
                 "What are some tips for maintaining a healthy diet?",
@@ -57,9 +75,10 @@ class HealthGradio:
                 "What are the benefits of regular exercise?",
                 "How can I manage stress effectively?"
             ],
-            retry_btn=None,
+            retry_btn="Retry",
             undo_btn="Delete Last",
             clear_btn="Clear",
+            stop_btn="Stop"
         )
 
         iface.launch(share=True)
