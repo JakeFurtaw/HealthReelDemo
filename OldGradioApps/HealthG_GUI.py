@@ -61,8 +61,8 @@ class HealthGradio:
 
         iface = gr.ChatInterface(
             self.chat,
-            chatbot=gr.Chatbot(value=initial_chat, height=600),
-            textbox=gr.Textbox(label="HealthG", show_label=True, container=True, autoscroll=True,
+            chatbot=gr.Chatbot(value=initial_chat),
+            textbox=gr.Textbox(label="HealthG", container=False, autoscroll=True,
                                placeholder="Type your health-related question here..."),
             title="HealthG: Your Personal Health Assistant",
             description="Welcome to HealthG! I'm here to assist you with health-related questions and advice. How can "
@@ -75,13 +75,15 @@ class HealthGradio:
                 "What are the benefits of regular exercise?",
                 "How can I manage stress effectively?"
             ],
+            fill_width=True,
+            fill_height=True,
             retry_btn="Retry",
             undo_btn="Delete Last",
             clear_btn="Clear",
             stop_btn="Stop"
         )
 
-        iface.launch(share=True)
+        iface.launch(inbrowser=True, share=True)
 
 
 if __name__ == "__main__":

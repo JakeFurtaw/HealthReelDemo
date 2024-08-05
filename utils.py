@@ -105,7 +105,8 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
         chat_mode=ChatMode.CONTEXT,
         memory=memory,
         llm=llm,
-        max_tokens=150,
+        max_tokens=100,
+        num_output=100,
         system_prompt=system_message,
         context_prompt=(
             "Context information is below.\n"
