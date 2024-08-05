@@ -263,3 +263,4 @@ yarl                                     1.9.4
 zipp                                     3.19.2
 torch~=2.4.0+cu121
 utils~=1.0.2
+gradio~=4.40.0

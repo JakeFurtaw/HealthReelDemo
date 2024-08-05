@@ -62,8 +62,7 @@ def load_past_chats():
 
     loaded_chat_store = SimpleChatStore.from_persist_path(persist_path=chat_store_path)
     chats = []
-    for user_id in loaded_chat_store.get_keys():
-        messages = loaded_chat_store.get_messages(user_id)
+    for chat_key, messages in loaded_chat_store.items():
         for idx, message in enumerate(messages):
             if isinstance(message, dict):
                 chats.append(Document(text=message['content'], metadata={"role": message['role'], "index": idx}))
