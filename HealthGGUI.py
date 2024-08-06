@@ -6,12 +6,6 @@ from HealthG import main as healthg_main
 from utils import handle_chat_storage
 
 
-def undo_last(history):
-    if history:
-        history.pop()
-    return history
-
-
 class HealthGradio:
     def __init__(self):
         self.input_queue = queue.Queue()
@@ -44,23 +38,10 @@ class HealthGradio:
         return chat_history
 
     def chat(self, message, history):
-        print(f"Received message: {message}")  # Debug print
         self.input_queue.put(message)
 
         try:
             response = self.output_queue.get(timeout=60)
-            print(f"Received response: {response}")  # Debug print
-
-            # Save the message and response to chat history
-            self.simple_chat_store.add_message(self.user_id, {"role": "user", "content": message}, self.message_index)
-            self.message_index += 1
-            self.simple_chat_store.add_message(self.user_id, {"role": "assistant", "content": response},
-                                               self.message_index)
-            self.message_index += 1
-
-            # Persist the updated chat store
-            self.simple_chat_store.persist("data/chat_storage.json")
-
             # Update history
             history.append((message, response))
             return "", history  # Return empty string for input and updated history
@@ -72,11 +53,9 @@ class HealthGradio:
         def custom_input(*args):
             print("Waiting for input...")  # Debug print
             msg = self.input_queue.get()
-            print(f"Received input: {msg}")  # Debug print
             return msg
 
         def custom_print(message):
-            print(f"Sending output: {message}")  # Debug print
             self.output_queue.put(message)
 
         # Call the main function from HealthG with custom input and output functions
@@ -108,12 +87,11 @@ class HealthGradio:
             msg = gr.Textbox(label="HealthG", container=False, autoscroll=True, autofocus=True,
                              placeholder="Type your health-related question here...")
             with gr.Row():
-                clear = gr.Button("Start New Chat")
-                undo = gr.Button("Undo")
+                clear = gr.ClearButton([msg, chatbot])  # Just clears chat window
+                new_chat = gr.Button("Start New Chat")  # Clears chat history too
 
             msg.submit(self.chat, [msg, chatbot], [msg, chatbot])
-            clear.click(self.start_new_chat, outputs=[chatbot, msg])
-            undo.click(undo_last, inputs=[chatbot], outputs=[chatbot])
+            new_chat.click(self.start_new_chat, outputs=[chatbot])
 
             gr.Examples(
                 examples=[

@@ -75,7 +75,7 @@ def load_past_chats():
 def load_environment_and_models():
     lc_embedding_model = load_embedding_model()
     embed_model = LangchainEmbedding(lc_embedding_model)
-    llm = Ollama(model="mistral-nemo:latest", request_timeout=30.0, device=set_device(1))
+    llm = Ollama(model="mistral-nemo:latest", request_timeout=30.0, device=set_device(1), num_output=100)
     return embed_model, llm
 
 
@@ -105,8 +105,6 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
         chat_mode=ChatMode.CONTEXT,
         memory=memory,
         llm=llm,
-        max_tokens=100,
-        num_output=100,
         system_prompt=system_message,
         context_prompt=(
             "Context information is below.\n"

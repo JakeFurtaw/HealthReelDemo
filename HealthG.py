@@ -18,31 +18,27 @@ def main(custom_input=input, custom_print=print):
 
     while True:
         user_query = custom_input()
-        print(f"Received query: {user_query}")  # Debug print
-
         if user_query.lower() == 'e':
             simple_chat_store.delete_last_message(key=user_id)
             chat_memory.reset()
             custom_print("Thanks for using HealthG. Goodbye!")
             break
-
-        new_message = ChatMessage(role=MessageRole.USER, content=user_query)
-        simple_chat_store.add_message(key=user_id, message={"role": "user", "content": user_query}, idx=message_index)
-        chat_memory.put(new_message)
         message_index += 1
-
+        # Save user message
+        simple_chat_store.add_message(key=user_id, message={"role": "user", "content": user_query}, idx=message_index)
         response = chat_engine.chat(user_query)
-        print(f"Generated response: {response}")  # Debug print
         custom_print(str(response))
 
-        assistant_message = ChatMessage(role=MessageRole.ASSISTANT, content=str(response))
-        simple_chat_store.add_message(key=user_id, message={"role": "assistant", "content": str(response)},
-                                      idx=message_index)
-        chat_memory.put(assistant_message)
+        # Save assistant message
         message_index += 1
+        simple_chat_store.add_message(key=user_id, message={"role": "assistant", "content": str(response)}, idx=message_index)
 
         # Persist the updated chat store after each interaction
         simple_chat_store.persist("data/chat_storage.json")
+
+        # Update chat memory
+        chat_memory.put(ChatMessage(role=MessageRole.USER, content=user_query))
+        chat_memory.put(ChatMessage(role=MessageRole.ASSISTANT, content=str(response)))
 
 
 if __name__ == "__main__":
