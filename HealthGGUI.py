@@ -12,16 +12,11 @@ class HealthGradio:
         self.output_queue = queue.Queue()
         self.simple_chat_store, self.chat_memory = handle_chat_storage()
         self.user_id = "user1"
-        self.message_index = self.get_last_message_index()
         self.past_messages = self.load_past_messages()
 
         # Start HealthG in a separate thread
         self.healthg_thread = threading.Thread(target=self.run_healthg)
         self.healthg_thread.start()
-
-    def get_last_message_index(self):
-        messages = self.simple_chat_store.get_messages(self.user_id)
-        return len(messages)
 
     def load_past_messages(self):
         messages = self.simple_chat_store.get_messages(self.user_id)
