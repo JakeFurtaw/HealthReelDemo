@@ -8,6 +8,7 @@ from utils import handle_chat_storage
 
 class HealthGradio:
     def __init__(self):
+        self.message_index = 0
         self.input_queue = queue.Queue()
         self.output_queue = queue.Queue()
         self.simple_chat_store, self.chat_memory = handle_chat_storage()
