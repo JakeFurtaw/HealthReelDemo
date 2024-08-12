@@ -48,6 +48,7 @@ The project uses a `config.py` file for various settings. Make sure to set up th
 - `chat.py`: Handles chat functionality and storage
 - `models.py`: Sets up the embedding model, language model, and chat engine
 - `utils.py`: Contains utility functions for the project
+- `config.py`: Contains default configurations
 
 ## Dependencies
 
