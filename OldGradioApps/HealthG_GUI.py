@@ -1,4 +1,4 @@
-import HealthG as gr
+import HealthBot as gr
 import queue
 import threading
 from chat import main as healthg_main

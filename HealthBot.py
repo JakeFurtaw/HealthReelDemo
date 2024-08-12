@@ -4,7 +4,7 @@ from config import GRADIO_THEME, CHATBOT_HEIGHT
 from models import load_embedding_model, load_llm
 
 
-class HealthGGradio:
+class HealthBotGradio:
     def __init__(self):
         self.user_id = None
         self.health_g = None
@@ -30,16 +30,16 @@ class HealthGGradio:
 
     def launch(self):
         with gr.Blocks(theme=GRADIO_THEME, fill_height=True) as iface:
-            gr.Markdown("# HealthG: Your Personal Health Assistant")
+            gr.Markdown("# Health Bot: Your Personal Health Assistant")
             gr.Markdown(
-                "Welcome to HealthG! I'm here to assist you with health-related questions and advice. How can I "
+                "Welcome to Health Bot! I'm here to assist you with health-related questions and advice. How can I "
                 "help you today?")
             with gr.Group() as user_id_group:
                 user_id = gr.Textbox(placeholder="Enter Username Here...", label="Username",
                                      info="Enter your username here so I know who you are.", interactive=True,
                                      autofocus=True)
             with gr.Group(visible=False) as main_interface:
-                chatbot = gr.Chatbot(height=CHATBOT_HEIGHT, label="HealthG", container=False)
+                chatbot = gr.Chatbot(height=CHATBOT_HEIGHT, label="Health Bot", container=False)
                 msg = gr.Textbox(label="HealthG", container=False, autoscroll=True, autofocus=True,
                                  placeholder="Type your health-related question here...")
                 with gr.Row():

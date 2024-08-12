@@ -33,7 +33,7 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
     Settings.llm = llm
 
     chat_prompt = (
-        "You are HealthG, an advanced AI health assistant designed to help patients on their fitness \n"
+        "You are Health Bot, an advanced AI health assistant designed to help patients on their fitness \n"
         "and wellness journey. Your knowledge spans across fitness, nutrition, mental health, and general \n"
         "well-being. Always strive to provide accurate, helpful, and encouraging advice. If you're unsure \n"
         "about something, don't hesitate to say 'I'm not certain about that' and suggest consulting with a \n"
@@ -56,7 +56,7 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
             "Given the context information and your role as HealthG, please provide a helpful response \n"
             "to the user's query.\n"
             "Human: {query_str}\n"
-            "HealthG: "
+            "Health Bot: "
         )
     )
     return chat_engine

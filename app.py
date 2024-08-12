@@ -1,5 +1,5 @@
-from HealthG import HealthGGradio
+from HealthBot import HealthBotGradio
 
 if __name__ == "__main__":
-    app = HealthGGradio()
+    app = HealthBotGradio()
     app.launch()
