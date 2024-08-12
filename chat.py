@@ -4,13 +4,6 @@ from llama_index.core.llms import MessageRole, ChatMessage
 from config import CHAT_STORAGE_PATH
 
 
-def create_chat_engine():
-    chats, memory = handle_chat_storage()
-    embed_model = load_embedding_model()
-    llm = load_llm()
-    return setup_index_and_chat_engine(chats=chats, llm=llm, embed_model=embed_model, memory=memory)
-
-
 class Chat:
     def __init__(self, user_id, embed_model, llm):
         self.user_id = user_id
@@ -35,8 +28,14 @@ class Chat:
         self.chat_memory.put(assistant_message)
         return str(response)
 
+    def create_chat_engine(self):
+        chats, memory = handle_chat_storage()
+        embed_model = self.embed_model
+        llm = self.llm
+        return setup_index_and_chat_engine(chats=chats, llm=llm, embed_model=embed_model, memory=memory)
+
     def reset_chat(self):
         self.simple_chat_store.delete_messages(self.user_id)
         self.chat_memory.reset()
         self.simple_chat_store.persist(CHAT_STORAGE_PATH)
-        self.chat_engine = create_chat_engine()
+        self.chat_engine = self.create_chat_engine()
