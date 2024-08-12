@@ -1,7 +1,7 @@
-import gradio as gr
+import HealthG as gr
 import queue
 import threading
-from HealthG import main as healthg_main
+from chat import main as healthg_main
 from utils import handle_chat_storage
 
 

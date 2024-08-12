@@ -1,89 +1,74 @@
-from llama_index.core.memory import ChatMemoryBuffer
-from utils import load_past_chats, handle_chat_storage
-from models import load_embedding_model, load_llm, setup_index_and_chat_engine
-from llama_index.core.llms import MessageRole, ChatMessage
-from config import CHAT_STORAGE_PATH
+import gradio as gr
+from chat import Chat
+from config import GRADIO_THEME, CHATBOT_HEIGHT
+from models import load_embedding_model, load_llm
 
 
-class HealthG:
-    def __init__(self, user_id):
-        self.user_id = user_id
+class HealthGGradio:
+    def __init__(self):
+        self.user_id = None
+        self.health_g = None
         self.embed_model = load_embedding_model()
         self.llm = load_llm()
-        self.chats = load_past_chats()
-        self.simple_chat_store, self.chat_memory = handle_chat_storage()
-        self.message_index = len(self.simple_chat_store.get_messages(self.user_id))
-        self.chat_memory = self._load_past_messages()
-        self.chat_engine = setup_index_and_chat_engine(self.chats, self.embed_model, self.llm, self.chat_memory)
 
-    def _load_past_messages(self):
-        past_messages = self.simple_chat_store.get_messages(key=self.user_id)
-        updated_chat_memory = ChatMemoryBuffer.from_defaults(
-            token_limit=self.chat_memory.token_limit,
-            chat_store=self.simple_chat_store
-        )
-        for msg in past_messages:
-            if isinstance(msg, ChatMessage):
-                updated_chat_memory.put(msg)
-            elif isinstance(msg, dict):
-                updated_chat_memory.put(ChatMessage(role=MessageRole(msg['role']), content=msg['content']))
-            else:
-                print(f"Unexpected message format: {msg}")
+    def set_user_id(self, user_id):
+        self.user_id = user_id
+        self.health_g = Chat(user_id, self.embed_model, self.llm)
+        return self.user_id, self.health_g.get_past_messages()
 
-        # Update the message_index
-        self.message_index = len(past_messages)
+    def chat(self, message, history):
+        if self.health_g is None:
+            return "", history + [("", "Please set a user ID first.")]
+        response = self.health_g.chat(message)
+        history.append((message, response))
+        return "", history
 
-        return updated_chat_memory
+    def start_new_chat(self):
+        if self.health_g:
+            self.health_g.reset_chat()
+        return []
 
-    def get_past_messages(self):
-        past_messages = self.simple_chat_store.get_messages(key=self.user_id)
-        formatted_messages = []
-        user_message = None
+    def launch(self):
+        with gr.Blocks(theme=GRADIO_THEME, fill_height=True) as iface:
+            gr.Markdown("# HealthG: Your Personal Health Assistant")
+            gr.Markdown(
+                "Welcome to HealthG! I'm here to assist you with health-related questions and advice. How can I "
+                "help you today?")
+            with gr.Group() as user_id_group:
+                user_id = gr.Textbox(placeholder="Enter Username Here...", label="Username",
+                                     info="Enter your username here so I know who you are.", interactive=True,
+                                     autofocus=True)
+            with gr.Group(visible=False) as main_interface:
+                chatbot = gr.Chatbot(height=CHATBOT_HEIGHT, label="HealthG", container=False)
+                msg = gr.Textbox(label="HealthG", container=False, autoscroll=True, autofocus=True,
+                                 placeholder="Type your health-related question here...")
+                with gr.Row():
+                    gr.ClearButton([msg, chatbot], value="Clear Chat Window")
+                    new_chat = gr.Button("Start New Chat")
 
-        for msg in past_messages:
-            if msg.role == MessageRole.USER:
-                user_message = msg.content
-            elif msg.role == MessageRole.ASSISTANT and user_message is not None:
-                formatted_messages.append((user_message, msg.content))
-                user_message = None
+                gr.Examples(
+                    examples=[
+                        "What are some tips for maintaining a healthy diet?",
+                        "How can I improve my sleep quality?",
+                        "What are the benefits of regular exercise?",
+                        "How can I manage stress effectively?"
+                    ],
+                    inputs=msg
+                )
 
-        # If there's an unpaired user message at the end, add it
-        if user_message is not None:
-            formatted_messages.append((user_message, None))
+            def show_interface(si_user_id):
+                si_user_id, chat_history = self.set_user_id(si_user_id)
+                if si_user_id.strip():  # Check if user_id is not empty
+                    return (gr.Group(visible=False),  # Hide user ID group
+                            gr.Group(visible=True),  # Show main interface
+                            chat_history)
+                return (gr.Group(visible=True),  # Keep user ID group visible
+                        gr.Group(visible=False),  # Keep main interface hidden
+                        [])
 
-        return formatted_messages
+            user_id.submit(self.set_user_id, inputs=user_id)
+            user_id.submit(show_interface, inputs=user_id, outputs=[user_id_group, main_interface, chatbot])
+            msg.submit(self.chat, [msg, chatbot], [msg, chatbot])
+            new_chat.click(self.start_new_chat, outputs=[chatbot])
 
-    def chat(self, user_query):
-        self.message_index += 1
-        user_message = ChatMessage(role=MessageRole.USER, content=user_query)
-        self.simple_chat_store.add_message(key=self.user_id, message=user_message, idx=self.message_index)
-        response = self.chat_engine.chat(user_query)
-        self.message_index += 1
-        assistant_message = ChatMessage(role=MessageRole.ASSISTANT, content=str(response))
-        self.simple_chat_store.add_message(key=self.user_id, message=assistant_message, idx=self.message_index)
-        self.simple_chat_store.persist(CHAT_STORAGE_PATH)
-        self.chat_memory.put(user_message)
-        self.chat_memory.put(assistant_message)
-        return str(response)
-
-    def reset_chat(self):
-        self.simple_chat_store.delete_messages(self.user_id)
-        self.message_index = 0
-        self.chat_memory.reset()
-        self.simple_chat_store.persist(CHAT_STORAGE_PATH)
-
-
-def main(custom_input=input, custom_print=print):
-    health_g = HealthG()
-    while True:
-        user_query = custom_input()
-        if user_query.lower() == 'e':
-            health_g.reset_chat()
-            custom_print("Thanks for using HealthG. Goodbye!")
-            break
-        response = health_g.chat(user_query)
-        custom_print(response)
-
-
-if __name__ == "__main__":
-    main()
+        iface.launch(inbrowser=True, share=True)

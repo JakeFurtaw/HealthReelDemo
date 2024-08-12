@@ -1,7 +1,7 @@
 from llama_index.embeddings.langchain import LangchainEmbedding
 from llama_index.llms.ollama import Ollama
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, Document
 from llama_index.core.chat_engine.types import ChatMode
 from llama_index.core.llms import ChatMessage
 from config import EMBEDDING_MODEL_NAME, LLM_MODEL_NAME
@@ -24,7 +24,12 @@ def load_llm(model_name: str = LLM_MODEL_NAME):
 
 
 def setup_index_and_chat_engine(chats, embed_model, llm, memory):
-    index = VectorStoreIndex.from_documents(chats, embed_model=embed_model)
+    documents = [
+        Document(text=chat.content, metadata={"role": chat.role})
+        for chat in chats
+    ]
+
+    index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
     Settings.llm = llm
 
     chat_prompt = (
