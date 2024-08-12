@@ -1,5 +1,5 @@
 from utils import handle_chat_storage
-from models import setup_index_and_chat_engine, load_embedding_model, load_llm
+from models import setup_index_and_chat_engine
 from llama_index.core.llms import MessageRole, ChatMessage
 from config import CHAT_STORAGE_PATH
 
