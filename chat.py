@@ -1,7 +1,14 @@
 from utils import handle_chat_storage
-from models import setup_index_and_chat_engine
+from models import setup_index_and_chat_engine, load_embedding_model, load_llm
 from llama_index.core.llms import MessageRole, ChatMessage
 from config import CHAT_STORAGE_PATH
+
+
+def create_chat_engine():
+    chats, memory = handle_chat_storage()
+    embed_model = load_embedding_model()
+    llm = load_llm()
+    return setup_index_and_chat_engine(chats=chats, llm=llm, embed_model=embed_model, memory=memory)
 
 
 class Chat:
@@ -32,3 +39,4 @@ class Chat:
         self.simple_chat_store.delete_messages(self.user_id)
         self.chat_memory.reset()
         self.simple_chat_store.persist(CHAT_STORAGE_PATH)
+        self.chat_engine = create_chat_engine()

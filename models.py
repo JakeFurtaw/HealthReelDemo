@@ -24,10 +24,15 @@ def load_llm(model_name: str = LLM_MODEL_NAME):
 
 
 def setup_index_and_chat_engine(chats, embed_model, llm, memory):
-    documents = [
-        Document(text=chat.content, metadata={"role": chat.role})
-        for chat in chats
-    ]
+    documents = []
+    for chat in chats:
+        if isinstance(chat, tuple) and len(chat) == 2:
+            content, role = chat
+            documents.append(Document(text=content, metadata={"role": role}))
+        elif hasattr(chat, 'content') and hasattr(chat, 'role'):
+            documents.append(Document(text=chat.content, metadata={"role": chat.role}))
+        else:
+            print(f"Skipping invalid chat entry: {chat}")
 
     index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
     Settings.llm = llm
