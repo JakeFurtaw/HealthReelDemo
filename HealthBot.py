@@ -29,7 +29,7 @@ class HealthBotGradio:
         return []
 
     def launch(self):
-        with gr.Blocks(theme=GRADIO_THEME, fill_height=True) as iface:
+        with gr.Blocks(theme=GRADIO_THEME, fill_height=True, fill_width=True, title="Health Bot") as iface:
             gr.Markdown("# Health Bot: Your Personal Health Assistant")
             gr.Markdown(
                 "Welcome to Health Bot! I'm here to assist you with health-related questions and advice. ")

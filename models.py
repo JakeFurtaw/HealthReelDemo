@@ -44,7 +44,7 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
         "about something, don't hesitate to say 'I'm not certain about that' and suggest consulting with a \n"
         "healthcare professional. Remember to be empathetic and supportive in your interactions. \n"
         "Your goal is to guide users towards healthier lifestyles while ensuring they seek professional \n"
-        "medical advice when necessary."
+        "medical advice when necessary. Only discuss health related topics, even if a user asks about another topic."
     )
 
     system_message = ChatMessage(role="system", content=chat_prompt)
@@ -58,7 +58,7 @@ def setup_index_and_chat_engine(chats, embed_model, llm, memory):
             "---------------------\n"
             "{context_str}\n"
             "---------------------\n"
-            "Given the context information and your role as HealthG, please provide a helpful response \n"
+            "Given the context information and your role as HealthBot, please provide a helpful response \n"
             "to the user's query.\n"
             "Human: {query_str}\n"
             "Health Bot: "
