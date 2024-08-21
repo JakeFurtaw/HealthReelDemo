@@ -8,7 +8,7 @@ from utils import set_device
 
 
 def load_embedding_model():
-    embed_model = HuggingFaceEmbedding(model_name="/home/jake/Programming/Models/embedding/stella_en_400M_v5",
+    embed_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL_NAME,
                                        device=set_device(0), trust_remote_code=True)
     return embed_model
 
