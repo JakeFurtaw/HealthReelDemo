@@ -14,7 +14,7 @@ def load_embedding_model():
 
 
 def load_llm(model_name: str = LLM_MODEL_NAME):
-    return Ollama(model=model_name, request_timeout=30.0, device=set_device(1), temperature=.5)
+    return Ollama(model=model_name, request_timeout=30.0, device=set_device(1), temperature=.75)
 
 
 def setup_index_and_chat_engine(chats, embed_model, llm, memory):
