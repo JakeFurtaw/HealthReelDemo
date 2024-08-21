@@ -1,6 +1,5 @@
-from llama_index.embeddings.langchain import LangchainEmbedding
 from llama_index.llms.ollama import Ollama
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import VectorStoreIndex, Settings, Document
 from llama_index.core.chat_engine.types import ChatMode
 from llama_index.core.llms import ChatMessage
@@ -8,15 +7,10 @@ from config import EMBEDDING_MODEL_NAME, LLM_MODEL_NAME
 from utils import set_device
 
 
-def load_embedding_model(model_name: str = EMBEDDING_MODEL_NAME, device=set_device(0)):
-    model_kwargs = {"device": device, "trust_remote_code": True}
-    encode_kwargs = {"normalize_embeddings": True}
-    embedding_model = HuggingFaceBgeEmbeddings(
-        model_name=model_name,
-        model_kwargs=model_kwargs,
-        encode_kwargs=encode_kwargs,
-    )
-    return LangchainEmbedding(embedding_model)
+def load_embedding_model():
+    embed_model = HuggingFaceEmbedding(model_name="/home/jake/Programming/Models/embedding/stella_en_400M_v5",
+                                       device=set_device(0), trust_remote_code=True)
+    return embed_model
 
 
 def load_llm(model_name: str = LLM_MODEL_NAME):
