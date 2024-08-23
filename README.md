@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 To run the HealthBot application:
 ```commandline
-python appy.py
+gradio HealthBot.py
 ```
 This will launch the Gradio interface in your default web browser.
 
