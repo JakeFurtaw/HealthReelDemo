@@ -43,7 +43,6 @@ The project uses a `config.py` file for various settings. Make sure to set up th
 
 ## Project Structure
 
-- `app.py`: Main entry point of the application
 - `HealthBot.py`: Contains the Gradio interface implementation
 - `chat.py`: Handles chat functionality and storage
 - `models.py`: Sets up the embedding model, language model, and chat engine
