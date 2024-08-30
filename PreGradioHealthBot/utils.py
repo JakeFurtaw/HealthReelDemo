@@ -40,7 +40,7 @@ def handle_chat_storage():
     # -----------------------------------------------
     # -------Change storage location below-----------
     # -----------------------------------------------
-    simple_chat_store.persist(persist_path="data/chat_storage.json")
+    simple_chat_store.persist(persist_path="short_term_storage/chat_storage.json")
 
     # Create ChatMemoryBuffer
     chat_memory = ChatMemoryBuffer.from_defaults(
@@ -55,7 +55,7 @@ def load_past_chats():
     # -----------------------------------------------
     # -------Change storage location below-----------
     # -----------------------------------------------
-    chat_store_path = "data/chat_storage.json"
+    chat_store_path = "short_term_storage/chat_storage.json"
     if not os.path.exists(chat_store_path) or os.path.getsize(chat_store_path) == 0:
         print("Warning: Chat storage file is empty or doesn't exist.")
         return [Document(text="No chat history available.", metadata={"role": "system"})]

@@ -33,7 +33,7 @@ class HealthGradio:
             self.message_index += 1
 
             # Persist the updated chat store
-            self.simple_chat_store.persist("data/chat_storage.json")
+            self.simple_chat_store.persist("short_term_storage/chat_storage.json")
 
             return response
         except queue.Empty:
