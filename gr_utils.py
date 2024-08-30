@@ -1,7 +1,6 @@
 from datetime import datetime
-from llama_index.core import Document
 from config import CHAT_STORAGE_PATH, LONG_TERM_STORAGE_PATH
-from models import load_models, setup_index_and_chat_engine, save_to_long_term_storage
+from models import load_models, setup_index_and_chat_engine
 from utils import handle_chat_storage
 from llama_index.core.llms import MessageRole, ChatMessage
 
@@ -12,16 +11,14 @@ class HealthBotGradio:
         self.embed_model, self.llm = load_models()
         self.simple_chat_store, self.chat_memory = handle_chat_storage()
         self.chat_engine = None
-        self.vector_store = None  # This will be set when set_user_id is called
 
     def set_user_id(self, user_id):
         self.user_id = user_id
-        self.chat_engine, self.vector_store = setup_index_and_chat_engine(
+        self.chat_engine= setup_index_and_chat_engine(
             self.simple_chat_store.get_messages(self.user_id),
             self.embed_model,
             self.llm,
             self.chat_memory,
-            LONG_TERM_STORAGE_PATH
         )
         return self.user_id, self.get_past_messages()
 
@@ -43,16 +40,8 @@ class HealthBotGradio:
         assistant_message = ChatMessage(role=MessageRole.ASSISTANT, content=full_response)
         self.simple_chat_store.add_message(key=self.user_id, message=assistant_message)
 
-        # Save to long-term storage
-        save_to_long_term_storage(self.vector_store, Document(
-            text=full_response,
-            metadata={"role": "assistant", "user_id": self.user_id, "timestamp": str(datetime.now())}
-        ))
-        save_to_long_term_storage(self.vector_store, Document(
-            text=message,
-            metadata={"role": "user", "user_id": self.user_id, "timestamp": str(datetime.now())}
-        ))
         self.simple_chat_store.persist(persist_path=CHAT_STORAGE_PATH)
+        self.simple_chat_store.persist(persist_path=LONG_TERM_STORAGE_PATH)
 
     def start_new_chat(self):
         if self.chat_engine:
@@ -64,6 +53,5 @@ class HealthBotGradio:
                 self.embed_model,
                 self.llm,
                 self.chat_memory,
-                self.vector_store
             )
         return []

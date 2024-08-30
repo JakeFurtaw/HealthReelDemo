@@ -31,13 +31,11 @@ with gr.Blocks(theme=GRADIO_THEME, fill_height=True, fill_width=True, title="Hea
             inputs=msg
         )
 
-
     def show_interface(si_user_id):
         si_user_id, chat_history = grUtils.set_user_id(si_user_id)
         return (gr.Group(visible=not bool(si_user_id.strip())),
                 gr.Group(visible=bool(si_user_id.strip())),
                 chat_history if si_user_id.strip() else [])
-
 
     user_id.submit(show_interface, inputs=user_id, outputs=[user_id_group, main_interface, chatbot])
     msg.submit(grUtils.chat, [msg, chatbot], [msg, chatbot])
